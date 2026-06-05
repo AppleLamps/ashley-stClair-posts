@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ashley St. Clair now condemns Elon Musk — but her own X posts show years of praise, defense, and support. Read the record."
+    />
+    <meta property="og:title" content="Ashley St. Clair Praised Elon Musk — The Public Record" />
+    <meta
+      property="og:description"
+      content="She says Musk is dangerous and offered her $40M to stay quiet. Her own posts say something else."
+    />
+    <meta property="og:type" content="website" />
+    <title>Ashley St. Clair Praised Elon Musk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <p class="eyebrow">@stclairashley · Public posts on X</p>
+          <h1>She Praised Elon. Now She Says He’s Dangerous.</h1>
+          <p class="subtitle">
+            Ashley St. Clair is on a media tour attacking Elon Musk. This page
+            collects her own public posts and replies — praising him, defending
+            his companies, and boosting his causes. The clearest contradictions
+            to what she says today are shown first.
+          </p>
+        </div>
+        <aside class="claim-card" aria-label="What Ashley St. Clair says now">
+          <h2>What she says now</h2>
+          <blockquote>
+            <p>
+              On Gavin Newsom’s podcast, Ashley St. Clair said she turned down a
+              <strong>$40 million payment with a non-disclosure agreement</strong>
+              from Elon Musk to stay silent about corruption she says she witnessed.
+            </p>
+            <p>
+              She says Musk’s companies — which she describes as building a
+              digital landscape — are
+              <strong>dangerous for the future of humanity</strong>.
+            </p>
+            <p class="quote-attr">“I was able to turn that down.”</p>
+          </blockquote>
+        </aside>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="stats-bar" id="stats-bar" aria-label="Summary">
+        <div class="stat">
+          <span class="stat-value" id="stat-total">—</span>
+          <span class="stat-label">Posts praising or defending Musk</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-strong">—</span>
+          <span class="stat-label">Hardest to square with today</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-direct">—</span>
+          <span class="stat-label">Replies directly to @elonmusk</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-span">—</span>
+          <span class="stat-label">Years covered</span>
+        </div>
+        <div class="stat stat--wide">
+          <span class="stat-value" id="stat-showing">—</span>
+          <span class="stat-label">Posts on this page</span>
+        </div>
+      </section>
+
+      <div class="toolbar-sticky">
+        <section class="controls" aria-label="Browse posts">
+          <div class="search-wrap">
+            <label for="search-input">Search posts</label>
+            <input
+              type="search"
+              id="search-input"
+              placeholder="Search by word or phrase…"
+              autocomplete="off"
+            />
+          </div>
+          <div class="control-group">
+            <label for="sort-select">Order</label>
+            <select id="sort-select">
+              <option value="contradiction">Most at odds with her story today</option>
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="engagement">Most liked</option>
+              <option value="views">Most viewed</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="type-select">Show</label>
+            <select id="type-select">
+              <option value="all">All posts</option>
+              <option value="Tweet">Her posts only</option>
+              <option value="Reply">Her replies only</option>
+              <option value="Retweet">Her reposts only</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="min-score">Filter</label>
+            <select id="min-score">
+              <option value="0">Everything</option>
+              <option value="5">Notable examples</option>
+              <option value="8">Only the most damning</option>
+            </select>
+          </div>
+        </section>
+
+        <div class="quick-filters" id="quick-filters" aria-label="Shortcuts">
+          <span class="quick-label">Shortcuts</span>
+          <button type="button" class="btn-chip" data-quick="strong">Most damning posts</button>
+          <button type="button" class="btn-chip" data-quick="direct">Replies to Elon Musk</button>
+          <button type="button" class="btn-chip btn-chip--muted" data-quick="reset">Show all</button>
+        </div>
+
+        <div class="active-filters" id="active-filters" hidden aria-label="Active filters"></div>
+      </div>
+
+      <section class="featured" id="featured" hidden>
+        <div class="section-heading">
+          <h2>The three hardest posts to explain away</h2>
+          <p>
+            If her story today is true, these are among the most difficult posts
+            to reconcile.
+          </p>
+        </div>
+        <div class="featured-grid" id="featured-grid"></div>
+      </section>
+
+      <section class="feed" id="feed" aria-label="All posts">
+        <div class="feed-header">
+          <div>
+            <h2>Every post we found</h2>
+            <p class="feed-count" id="feed-count"></p>
+          </div>
+        </div>
+        <div id="post-list" class="post-list" role="list"></div>
+        <p id="empty-state" class="empty-state" hidden>
+          No posts match your search.
+        </p>
+        <div class="load-more-wrap">
+          <button type="button" class="btn-primary" id="load-more" hidden>
+            Load more posts
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <h3>About this page</h3>
+            <p>
+              Every post comes from Ashley St. Clair’s public account on X
+              (@stclairashley). Each entry links to the original so you can
+              read it in full and verify it yourself.
+            </p>
+          </div>
+          <div>
+            <h3>How posts are ordered</h3>
+            <p>
+              By default, posts that most sharply conflict with what she says
+              today — direct praise, defending Musk’s companies, or pushing his
+              political causes — appear first. You can re-order by date or
+              popularity using the controls above.
+            </p>
+          </div>
+        </div>
+        <p class="footer-meta">
+          <span id="data-generated"></span>
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
