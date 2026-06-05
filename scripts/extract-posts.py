@@ -7,7 +7,7 @@ from datetime import datetime
 import openpyxl
 
 XLSX_PATH = os.path.join(os.path.dirname(__file__), "..", "Ashley-posts.xlsx")
-OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "posts.json")
+OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "posts-all.json")
 
 PRAISE_PATTERNS = [
     (r"\b(genius|brilliant|greatest|hero|legend|amazing|incredible|inspiring|admire|respect)\b", 4),

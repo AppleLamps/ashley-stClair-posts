@@ -33,3 +33,6 @@ Desktop.ini
 *.log
 tmp/
 temp/
+
+# Full auto-extracted set (curated posts.json is what ships)
+data/posts-all.json

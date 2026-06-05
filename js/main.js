@@ -1,5 +1,5 @@
-import { loadPosts } from "./modules/api.js";
-import { filterPosts, getFeaturedPosts, computeStats } from "./modules/filters.js";
+import { loadFeaturedPicks, loadPosts, resolveFeaturedPosts } from "./modules/api.js";
+import { computeStats, filterPosts, sortPosts } from "./modules/filters.js";
 import {
   renderActiveFilters,
   renderFeatured,
@@ -11,9 +11,7 @@ import {
 import { createState } from "./modules/state.js";
 import { debounce, hasActiveFilters } from "./modules/utils.js";
 
-const PAGE_SIZE = 25;
-const FEATURED_COUNT = 3;
-const FEATURED_MIN_SCORE = 8;
+const PAGE_SIZE = 50;
 
 const elements = {
   stats: {
@@ -21,12 +19,10 @@ const elements = {
     direct: document.getElementById("stat-direct"),
     span: document.getElementById("stat-span"),
     showing: document.getElementById("stat-showing"),
-    strong: document.getElementById("stat-strong"),
   },
   search: document.getElementById("search-input"),
   sort: document.getElementById("sort-select"),
   type: document.getElementById("type-select"),
-  minScore: document.getElementById("min-score"),
   quickFilters: document.getElementById("quick-filters"),
   activeFilters: document.getElementById("active-filters"),
   featured: document.getElementById("featured"),
@@ -42,20 +38,18 @@ const elements = {
 const store = createState();
 
 function deriveLists(state) {
-  const filters = {
-    posts: state.posts,
-    query: state.query,
-    sort: state.sort,
-    type: state.type,
-    minScore: Number(state.minScore),
-  };
-
   const filtersActive = hasActiveFilters(state);
-  const featured = filtersActive
-    ? []
-    : getFeaturedPosts(filters.posts, FEATURED_COUNT, FEATURED_MIN_SCORE);
+  const featured = filtersActive ? [] : state.featured;
   const featuredIds = featured.map((post) => post.post_id);
-  const filtered = filterPosts(filters.posts, { ...filters, excludeIds: featuredIds });
+
+  const filtered = sortPosts(
+    filterPosts(state.posts, {
+      query: state.query,
+      type: state.type,
+      excludeIds: featuredIds,
+    }),
+    state.sort,
+  );
 
   return { filtered, featured, filtersActive };
 }
@@ -76,19 +70,19 @@ function updateFilters(partial, { resetVisible = true } = {}) {
 }
 
 function render() {
-  const { filtered, featured, visibleCount, posts, filtersActive, query, sort, type, minScore } =
+  const { filtered, featured, visibleCount, posts, filtersActive, query, sort, type } =
     store.get();
 
   const totalMatching = filtered.length + featured.length;
   const displayedInFeed = Math.min(visibleCount, filtered.length);
   const displayedTotal = displayedInFeed + (filtersActive ? 0 : featured.length);
 
-  const stats = computeStats(posts, {
-    filteredCount: totalMatching,
-    visibleCount: displayedTotal,
+  renderStats(elements.stats, {
+    ...computeStats(posts, {
+      filteredCount: totalMatching,
+      visibleCount: displayedTotal,
+    }),
   });
-
-  renderStats(elements.stats, stats);
 
   if (featured.length && !filtersActive) {
     elements.featured.hidden = false;
@@ -98,23 +92,17 @@ function render() {
     elements.featuredGrid.replaceChildren();
   }
 
-  renderActiveFilters(
-    elements.activeFilters,
-    { query, sort, type, minScore },
-    clearFilter,
-  );
+  renderActiveFilters(elements.activeFilters, { query, sort, type }, clearFilter);
 
   if (elements.feedCount) {
-    if (filtersActive) {
-      elements.feedCount.textContent = `Showing ${displayedTotal} of ${totalMatching} matching posts`;
-    } else {
-      elements.feedCount.textContent = `Showing ${displayedTotal} of ${totalMatching} posts`;
-    }
+    elements.feedCount.textContent = filtersActive
+      ? `${displayedTotal} of ${totalMatching} matching posts`
+      : `${displayedTotal} of ${totalMatching} posts`;
   }
 
   if (!totalMatching) {
     elements.postList.replaceChildren();
-    elements.emptyState.textContent = "No posts match your search. Try different words or clear your filters.";
+    elements.emptyState.textContent = "No posts match your search.";
     elements.emptyState.hidden = false;
     elements.loadMore.hidden = true;
     return;
@@ -126,7 +114,7 @@ function render() {
   } else {
     elements.postList.replaceChildren();
     elements.emptyState.textContent =
-      "No other posts match your search. The highlighted posts above are the only results.";
+      "No other posts match your search. See the highlighted posts above.";
     elements.emptyState.hidden = false;
   }
 
@@ -137,16 +125,14 @@ function syncControls(values) {
   if (values.query !== undefined) elements.search.value = values.query;
   if (values.sort) elements.sort.value = values.sort;
   if (values.type) elements.type.value = values.type;
-  if (values.minScore !== undefined) elements.minScore.value = String(values.minScore);
 }
 
 function clearFilter(key) {
   const resets = {
     query: { query: "" },
     type: { type: "all" },
-    minScore: { minScore: 0 },
-    sort: { sort: "contradiction" },
-    all: { query: "", type: "all", minScore: 0, sort: "contradiction" },
+    sort: { sort: "engagement" },
+    all: { query: "", type: "all", sort: "engagement" },
   };
 
   const patch = resets[key] ?? resets.all;
@@ -172,10 +158,6 @@ function bindControls() {
     updateFilters({ type: event.target.value });
   });
 
-  elements.minScore.addEventListener("change", (event) => {
-    updateFilters({ minScore: Number(event.target.value) });
-  });
-
   elements.loadMore.addEventListener("click", () => {
     const { visibleCount, filtered } = store.get();
     store.set({
@@ -189,22 +171,9 @@ function bindControls() {
 
     const { quick } = button.dataset;
 
-    if (quick === "strong") {
-      syncControls({ query: "", minScore: 8, sort: "contradiction", type: "all" });
-      updateFilters({ query: "", minScore: 8, sort: "contradiction", type: "all" });
-    } else if (quick === "direct") {
-      syncControls({
-        query: "@elonmusk",
-        minScore: 0,
-        sort: "contradiction",
-        type: "all",
-      });
-      updateFilters({
-        query: "@elonmusk",
-        minScore: 0,
-        sort: "contradiction",
-        type: "all",
-      });
+    if (quick === "direct") {
+      syncControls({ query: "@elonmusk", sort: "engagement", type: "all" });
+      updateFilters({ query: "@elonmusk", sort: "engagement", type: "all" });
     } else if (quick === "reset") {
       clearFilter("all");
     }
@@ -217,7 +186,12 @@ async function init() {
   showLoading(elements.postList);
 
   try {
-    const { posts, generated } = await loadPosts();
+    const [{ posts, generated }, picks] = await Promise.all([
+      loadPosts(),
+      loadFeaturedPicks(),
+    ]);
+
+    const featured = resolveFeaturedPosts(picks, posts);
 
     if (generated) {
       const date = new Date(generated).toLocaleDateString("en-US", {
@@ -225,16 +199,15 @@ async function init() {
         month: "long",
         day: "numeric",
       });
-      elements.dataGenerated.textContent = `Last updated ${date}. All posts link to their originals on X.`;
+      elements.dataGenerated.textContent = `Last updated ${date}. Every post links to its original on X.`;
     }
 
     bindControls();
-    updateFilters({ posts });
+    updateFilters({ posts, featured });
   } catch (error) {
     elements.postList.innerHTML = `
       <p class="empty-state">
-        Posts could not be loaded. Please refresh the page. If the problem
-        continues, try again later.
+        Posts could not be loaded. Please refresh the page.
       </p>
     `;
     console.error(error);

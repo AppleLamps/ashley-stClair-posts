@@ -1,25 +1,16 @@
 const HIGHLIGHT_PATTERNS = [
   /@elonmusk/gi,
   /\belon musk\b/gi,
-  /\belon\b/gi,
-  /\bmusk\b/gi,
-  /\bthank you\b/gi,
   /\bsaving america\b/gi,
-  /\bgenius\b/gi,
-  /\bgreatest\b/gi,
+  /\bthank you\b/gi,
   /\bhero\b/gi,
-  /\bmodern tea party\b/gi,
-  /\bone of my favorites\b/gi,
-  /\bawesome\b/gi,
-  /\bamazing\b/gi,
+  /\bgenius\b/gi,
   /\bgrok\b/gi,
   /\bxai\b/gi,
   /\bdoge\b/gi,
   /\btesla\b/gi,
   /\bspacex\b/gi,
   /\bstarlink\b/gi,
-  /\bfree speech\b/gi,
-  /\busaid\b/gi,
 ];
 
 const TRUNCATE_LENGTH = 320;
@@ -28,7 +19,7 @@ export function formatDate(iso) {
   const date = new Date(iso);
   return date.toLocaleDateString("en-US", {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
   });
 }
@@ -117,11 +108,6 @@ export function debounce(fn, delay = 250) {
   };
 }
 
-export function hasActiveFilters({ query, type, minScore, sort }) {
-  return Boolean(
-    query.trim() ||
-      type !== "all" ||
-      Number(minScore) > 0 ||
-      sort !== "contradiction",
-  );
+export function hasActiveFilters({ query, type, sort }) {
+  return Boolean(query.trim() || type !== "all" || sort !== "engagement");
 }

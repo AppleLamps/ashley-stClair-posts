@@ -10,7 +10,9 @@ Live site: deploy to [Vercel](https://vercel.com) (see below).
 ├── index.html          # Site entry point
 ├── css/styles.css      # Styles
 ├── js/                 # App logic (vanilla ES modules)
-├── data/posts.json     # Post data served to the browser (required for deploy)
+├── data/posts.json     # 50 hand-picked posts (required for deploy)
+├── data/featured.json  # Top 5 with editorial context
+├── data/posts-all.json # Full auto-extracted set (local only, gitignored)
 ├── Ashley-posts.xlsx   # Source spreadsheet
 └── scripts/
     └── extract-posts.py  # Regenerates data/posts.json from the spreadsheet
@@ -43,7 +45,17 @@ pip install -r requirements.txt
 python scripts/extract-posts.py
 ```
 
-This overwrites `data/posts.json`. Commit the updated JSON and redeploy.
+This writes `data/posts-all.json` (the full auto-extracted set). Then build the public set:
+
+```bash
+python scripts/build-curated.py
+```
+
+That writes `data/posts.json` — the **50 hand-picked posts** the site displays. Edit the `CURATED_IDS` list in `build-curated.py` to change which posts ship. Commit `data/posts.json` and redeploy.
+
+## Updating featured posts
+
+The five posts at the top are listed in `data/featured.json` with a short `why` line each. They must also appear in the curated 50. The app pulls full post text from `posts.json`.
 
 ## Deploy to Vercel
 

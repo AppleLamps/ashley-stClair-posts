@@ -13,59 +13,36 @@ const POST_TYPE_LABELS = {
   Retweet: "Repost",
 };
 
-function contradictionClass(score) {
-  return score >= 8
-    ? "contradiction-badge contradiction-badge--high"
-    : "contradiction-badge";
-}
-
-function scoreLabel(score) {
-  if (score >= 10) return "Directly contradicts her story today";
-  if (score >= 8) return "Hard to square with what she says now";
-  if (score >= 5) return "Praises Musk or his companies";
-  return "Supportive of Musk";
-}
-
 function formatPostType(type) {
   return POST_TYPE_LABELS[type] ?? type;
 }
 
-function buildPostCard(post, { featured = false, rank = null } = {}) {
+function buildPostCard(post) {
   const article = document.createElement("article");
-  article.className = `post-card${featured ? " post-card--featured" : ""}`;
+  article.className = "post-card";
   article.setAttribute("role", "listitem");
   article.dataset.postId = post.post_id;
 
   const isLong = shouldTruncate(post.content);
   const displayText = isLong ? truncateText(post.content) : post.content;
-  const rankMarkup = rank
-    ? `<span class="rank-badge" aria-label="Number ${rank}">#${rank}</span>`
-    : "";
 
   article.innerHTML = `
     <div class="post-meta">
-      ${rankMarkup}
       <span class="post-type">${escapeHtml(formatPostType(post.type))}</span>
       <time datetime="${escapeHtml(post.posted)}">${formatDate(post.posted)}</time>
-      <span class="${contradictionClass(post.score)}" title="${scoreLabel(post.score)}">
-        ${scoreLabel(post.score)}
-      </span>
     </div>
-    <p class="post-content" data-full="false">${highlightContent(displayText)}</p>
+    <blockquote class="post-content" data-full="false">${highlightContent(displayText)}</blockquote>
     ${
       isLong
         ? `<button type="button" class="btn-expand" aria-expanded="false">Read full post</button>`
         : ""
     }
     <div class="post-engagement" aria-label="Post activity">
-      <span title="Likes"><span class="eng-label">Likes</span> ${formatNumber(post.favorites)}</span>
-      <span title="Reposts"><span class="eng-label">Reposts</span> ${formatNumber(post.reposts)}</span>
-      <span title="Replies"><span class="eng-label">Replies</span> ${formatNumber(post.replies)}</span>
-      <span title="Views"><span class="eng-label">Views</span> ${formatNumber(post.views)}</span>
+      <span><strong>${formatNumber(post.favorites)}</strong> likes</span>
+      <span><strong>${formatNumber(post.views)}</strong> views</span>
     </div>
     <a class="post-link" href="${escapeHtml(post.url)}" target="_blank" rel="noopener noreferrer">
-      Read on X
-      <span aria-hidden="true">↗</span>
+      Read on X ↗
     </a>
   `;
 
@@ -93,10 +70,33 @@ function buildPostCard(post, { featured = false, rank = null } = {}) {
   return article;
 }
 
+function buildFeaturedCard(post, rank) {
+  const article = document.createElement("article");
+  article.className = "featured-card";
+
+  const isLong = shouldTruncate(post.content, 500);
+  const displayText = isLong ? truncateText(post.content, 500) : post.content;
+
+  article.innerHTML = `
+    <div class="featured-card__rank">${rank}</div>
+    <div class="featured-card__body">
+      <p class="featured-card__why">${escapeHtml(post.why)}</p>
+      <blockquote class="featured-card__quote">${highlightContent(displayText)}</blockquote>
+      <div class="featured-card__footer">
+        <time datetime="${escapeHtml(post.posted)}">${formatDate(post.posted)}</time>
+        <span class="featured-card__stats">${formatNumber(post.favorites)} likes · ${formatNumber(post.views)} views</span>
+        <a class="featured-card__link" href="${escapeHtml(post.url)}" target="_blank" rel="noopener noreferrer">Read on X ↗</a>
+      </div>
+    </div>
+  `;
+
+  return article;
+}
+
 export function renderFeatured(container, posts) {
   container.replaceChildren();
   posts.forEach((post, index) => {
-    container.appendChild(buildPostCard(post, { featured: true, rank: index + 1 }));
+    container.appendChild(buildFeaturedCard(post, index + 1));
   });
 }
 
@@ -113,9 +113,6 @@ export function renderStats(elements, stats) {
   elements.direct.textContent = stats.directElon;
   elements.span.textContent = stats.dateRange;
   elements.showing.textContent = stats.showing;
-  if (elements.strong) {
-    elements.strong.textContent = stats.strong;
-  }
 }
 
 const FILTER_LABELS = {
@@ -123,10 +120,6 @@ const FILTER_LABELS = {
     Tweet: "Her posts only",
     Reply: "Her replies only",
     Retweet: "Her reposts only",
-  },
-  minScore: {
-    5: "Notable examples",
-    8: "Only the most damning",
   },
   sort: {
     "date-desc": "Newest first",
@@ -148,13 +141,7 @@ export function renderActiveFilters(container, filters, onClear) {
       key: "type",
     });
   }
-  if (Number(filters.minScore) >= 5) {
-    chips.push({
-      label: FILTER_LABELS.minScore[filters.minScore] ?? "Filtered",
-      key: "minScore",
-    });
-  }
-  if (filters.sort !== "contradiction") {
+  if (filters.sort !== "engagement") {
     chips.push({
       label: FILTER_LABELS.sort[filters.sort] ?? filters.sort,
       key: "sort",
@@ -189,7 +176,7 @@ export function renderActiveFilters(container, filters, onClear) {
 }
 
 export function showLoading(container) {
-  container.innerHTML = '<p class="loading">Loading posts</p>';
+  container.innerHTML = '<p class="loading">Loading posts…</p>';
 }
 
 export function updateLoadMore(button, visibleCount, filteredCount) {

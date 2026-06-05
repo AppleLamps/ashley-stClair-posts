@@ -3,14 +3,13 @@ export function createState(initial = {}) {
 
   const state = {
     posts: [],
-    filtered: [],
     featured: [],
+    filtered: [],
     filtersActive: false,
     generated: null,
     query: "",
-    sort: "contradiction",
+    sort: "engagement",
     type: "all",
-    minScore: 0,
     visibleCount: 25,
     ...initial,
   };
