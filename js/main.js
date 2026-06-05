@@ -131,8 +131,8 @@ function clearFilter(key) {
   const resets = {
     query: { query: "" },
     type: { type: "all" },
-    sort: { sort: "engagement" },
-    all: { query: "", type: "all", sort: "engagement" },
+    sort: { sort: "editorial" },
+    all: { query: "", type: "all", sort: "editorial" },
   };
 
   const patch = resets[key] ?? resets.all;
@@ -172,8 +172,8 @@ function bindControls() {
     const { quick } = button.dataset;
 
     if (quick === "direct") {
-      syncControls({ query: "@elonmusk", sort: "engagement", type: "all" });
-      updateFilters({ query: "@elonmusk", sort: "engagement", type: "all" });
+      syncControls({ query: "@elonmusk", sort: "editorial", type: "all" });
+      updateFilters({ query: "@elonmusk", sort: "editorial", type: "all" });
     } else if (quick === "reset") {
       clearFilter("all");
     }

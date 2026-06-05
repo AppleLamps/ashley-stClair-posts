@@ -8,7 +8,7 @@ export function createState(initial = {}) {
     filtersActive: false,
     generated: null,
     query: "",
-    sort: "engagement",
+    sort: "editorial",
     type: "all",
     visibleCount: 25,
     ...initial,

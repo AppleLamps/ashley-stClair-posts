@@ -122,6 +122,7 @@ const FILTER_LABELS = {
     Retweet: "Her reposts only",
   },
   sort: {
+    editorial: "Hand-picked order",
     "date-desc": "Newest first",
     "date-asc": "Oldest first",
     engagement: "Most liked",
@@ -141,7 +142,7 @@ export function renderActiveFilters(container, filters, onClear) {
       key: "type",
     });
   }
-  if (filters.sort !== "engagement") {
+  if (filters.sort !== "editorial") {
     chips.push({
       label: FILTER_LABELS.sort[filters.sort] ?? filters.sort,
       key: "sort",

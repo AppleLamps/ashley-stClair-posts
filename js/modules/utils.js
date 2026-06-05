@@ -109,5 +109,5 @@ export function debounce(fn, delay = 250) {
 }
 
 export function hasActiveFilters({ query, type, sort }) {
-  return Boolean(query.trim() || type !== "all" || sort !== "engagement");
+  return Boolean(query.trim() || type !== "all" || sort !== "editorial");
 }

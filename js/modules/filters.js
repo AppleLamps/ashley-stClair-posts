@@ -1,4 +1,5 @@
 const SORTERS = {
+  editorial: (a, b) => 0,
   "date-desc": (a, b) => new Date(b.posted) - new Date(a.posted),
   "date-asc": (a, b) => new Date(a.posted) - new Date(b.posted),
   engagement: (a, b) => b.favorites - a.favorites || b.views - a.views,
@@ -29,7 +30,7 @@ export function filterPosts(posts, { query, type, excludeIds = [] }) {
 }
 
 export function sortPosts(posts, sort) {
-  const sorter = SORTERS[sort] ?? SORTERS.engagement;
+  const sorter = SORTERS[sort] ?? SORTERS.editorial;
   return [...posts].sort(sorter);
 }
 
